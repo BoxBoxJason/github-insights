@@ -10,7 +10,7 @@ import (
 
 // openPR returns a minimal open PullRequest for use in tests.
 func openPR() *github.PullRequest {
-	return &github.PullRequest{State: ptrOf("open")}
+	return &github.PullRequest{State: new("open")}
 }
 
 // TestPRStatus verifies that prStatus returns the correct status string for
@@ -30,12 +30,12 @@ func TestPRStatus(t *testing.T) {
 	}{
 		{
 			name: "merged",
-			pr:   &github.PullRequest{Merged: ptrOf(true), State: ptrOf("closed")},
+			pr:   &github.PullRequest{Merged: new(true), State: new("closed")},
 			want: "Merged",
 		},
 		{
 			name: "draft",
-			pr:   &github.PullRequest{State: ptrOf("open"), Draft: ptrOf(true)},
+			pr:   &github.PullRequest{State: new("open"), Draft: new(true)},
 			want: "Draft",
 		},
 		{
@@ -88,7 +88,7 @@ func TestPRStatus(t *testing.T) {
 		},
 		{
 			name: "closed non-merged",
-			pr:   &github.PullRequest{State: ptrOf("closed")},
+			pr:   &github.PullRequest{State: new("closed")},
 			want: "Closed",
 		},
 	}

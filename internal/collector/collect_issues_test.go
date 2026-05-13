@@ -21,11 +21,11 @@ func TestBuildIssueActivity(t *testing.T) {
 		t.Parallel()
 
 		issue := &github.Issue{
-			Number:    ptrOf(42),
-			Title:     ptrOf("Bug: crash on startup"),
-			HTMLURL:   ptrOf("https://github.com/owner/repo/issues/42"),
-			User:      &github.User{Login: ptrOf("reporter")},
-			Body:      ptrOf("Steps to reproduce..."),
+			Number:    new(42),
+			Title:     new("Bug: crash on startup"),
+			HTMLURL:   new("https://github.com/owner/repo/issues/42"),
+			User:      &github.User{Login: new("reporter")},
+			Body:      new("Steps to reproduce..."),
 			CreatedAt: &github.Timestamp{Time: timestamp},
 			UpdatedAt: &github.Timestamp{Time: timestamp},
 		}
@@ -61,7 +61,7 @@ func TestBuildIssueActivity(t *testing.T) {
 		t.Parallel()
 
 		issue := &github.Issue{
-			Reactions: &github.Reactions{TotalCount: ptrOf(7)},
+			Reactions: &github.Reactions{TotalCount: new(7)},
 			CreatedAt: &github.Timestamp{Time: timestamp},
 			UpdatedAt: &github.Timestamp{Time: timestamp},
 		}
@@ -82,17 +82,17 @@ func TestBuildIssueActivity(t *testing.T) {
 		}
 		comments := []*github.IssueComment{
 			{
-				ID:        ptrOf(int64(1)),
-				User:      &github.User{Login: ptrOf(testUserAlice)},
-				Body:      ptrOf("first comment"),
-				HTMLURL:   ptrOf("https://github.com/owner/repo/issues/42#issuecomment-1"),
+				ID:        new(int64(1)),
+				User:      &github.User{Login: new(testUserAlice)},
+				Body:      new("first comment"),
+				HTMLURL:   new("https://github.com/owner/repo/issues/42#issuecomment-1"),
 				CreatedAt: &github.Timestamp{Time: timestamp},
 			},
 			{
-				ID:        ptrOf(int64(2)),
-				User:      &github.User{Login: ptrOf("bob")},
-				Body:      ptrOf("second comment"),
-				HTMLURL:   ptrOf("https://github.com/owner/repo/issues/42#issuecomment-2"),
+				ID:        new(int64(2)),
+				User:      &github.User{Login: new("bob")},
+				Body:      new("second comment"),
+				HTMLURL:   new("https://github.com/owner/repo/issues/42#issuecomment-2"),
 				CreatedAt: &github.Timestamp{Time: timestamp},
 			},
 		}

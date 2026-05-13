@@ -19,19 +19,19 @@ func TestExtractMentions(t *testing.T) {
 
 	makeIssue := func(body string) *github.Issue {
 		return &github.Issue{
-			Title:     ptrOf("Test issue"),
-			HTMLURL:   ptrOf("https://github.com/owner/repo/issues/1"),
-			User:      &github.User{Login: ptrOf("author")},
-			Body:      ptrOf(body),
+			Title:     new("Test issue"),
+			HTMLURL:   new("https://github.com/owner/repo/issues/1"),
+			User:      &github.User{Login: new("author")},
+			Body:      new(body),
 			CreatedAt: &github.Timestamp{Time: timestamp},
 		}
 	}
 
 	makeComment := func(body, login string) *github.IssueComment {
 		return &github.IssueComment{
-			User:      &github.User{Login: ptrOf(login)},
-			Body:      ptrOf(body),
-			HTMLURL:   ptrOf("https://github.com/owner/repo/issues/1#issuecomment-1"),
+			User:      &github.User{Login: new(login)},
+			Body:      new(body),
+			HTMLURL:   new("https://github.com/owner/repo/issues/1#issuecomment-1"),
 			CreatedAt: &github.Timestamp{Time: timestamp},
 		}
 	}

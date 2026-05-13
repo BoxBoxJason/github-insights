@@ -18,9 +18,6 @@ const (
 	testActivityKey       = "owner/repo"
 )
 
-// ptrOf is a generic helper for constructing pointer values in tests.
-func ptrOf[T any](v T) *T { return &v }
-
 // sliceEqual reports whether two string slices are equal.
 func sliceEqual(first, second []string) bool {
 	if len(first) != len(second) {
@@ -40,7 +37,7 @@ func sliceEqual(first, second []string) bool {
 // time.
 func makeReview(state string, at time.Time) *github.PullRequestReview {
 	return &github.PullRequestReview{
-		State:       ptrOf(state),
+		State:       new(state),
 		SubmittedAt: &github.Timestamp{Time: at},
 	}
 }
@@ -48,9 +45,9 @@ func makeReview(state string, at time.Time) *github.PullRequestReview {
 // makeReviewByUser builds a PullRequestReview with the given user login.
 func makeReviewByUser(login, state string, at time.Time) *github.PullRequestReview {
 	return &github.PullRequestReview{
-		State:       ptrOf(state),
+		State:       new(state),
 		SubmittedAt: &github.Timestamp{Time: at},
-		User:        &github.User{Login: ptrOf(login)},
+		User:        &github.User{Login: new(login)},
 	}
 }
 
@@ -172,11 +169,11 @@ func TestRepoFromIssue(t *testing.T) {
 			issue := &github.Issue{}
 
 			if testCase.repoURL != "" {
-				issue.RepositoryURL = ptrOf(testCase.repoURL)
+				issue.RepositoryURL = new(testCase.repoURL)
 			}
 
 			if testCase.rawURL != "" {
-				issue.URL = ptrOf(testCase.rawURL)
+				issue.URL = new(testCase.rawURL)
 			}
 
 			owner, repo, err := repoFromIssue(issue)
@@ -216,7 +213,7 @@ func TestLatestReviewState(t *testing.T) {
 		{name: "nil review in slice", reviews: []*github.PullRequestReview{nil}, want: ""},
 		{
 			name:    "review with nil SubmittedAt is skipped",
-			reviews: []*github.PullRequestReview{{State: ptrOf(stateApproved)}},
+			reviews: []*github.PullRequestReview{{State: new(stateApproved)}},
 			want:    "",
 		},
 		{
@@ -314,10 +311,10 @@ func TestCommentFromIssueComment(t *testing.T) {
 
 	timestamp := time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC)
 	comment := &github.IssueComment{
-		ID:        ptrOf(int64(42)),
-		User:      &github.User{Login: ptrOf(testUserAlice)},
-		Body:      ptrOf("looks good"),
-		HTMLURL:   ptrOf("https://github.com/owner/repo/issues/1#issuecomment-42"),
+		ID:        new(int64(42)),
+		User:      &github.User{Login: new(testUserAlice)},
+		Body:      new("looks good"),
+		HTMLURL:   new("https://github.com/owner/repo/issues/1#issuecomment-42"),
 		CreatedAt: &github.Timestamp{Time: timestamp},
 	}
 
@@ -351,10 +348,10 @@ func TestCommentFromReviewComment(t *testing.T) {
 
 	timestamp := time.Date(2024, time.February, 1, 12, 0, 0, 0, time.UTC)
 	comment := &github.PullRequestComment{
-		ID:        ptrOf(int64(99)),
-		User:      &github.User{Login: ptrOf("bob")},
-		Body:      ptrOf("nit: formatting"),
-		HTMLURL:   ptrOf("https://github.com/owner/repo/pull/5#discussion_r99"),
+		ID:        new(int64(99)),
+		User:      &github.User{Login: new("bob")},
+		Body:      new("nit: formatting"),
+		HTMLURL:   new("https://github.com/owner/repo/pull/5#discussion_r99"),
 		CreatedAt: &github.Timestamp{Time: timestamp},
 	}
 
@@ -384,11 +381,11 @@ func TestCommentFromReview(t *testing.T) {
 
 	timestamp := time.Date(2024, time.March, 5, 8, 0, 0, 0, time.UTC)
 	review := &github.PullRequestReview{
-		ID:          ptrOf(int64(7)),
-		User:        &github.User{Login: ptrOf("carol")},
-		Body:        ptrOf("LGTM"),
-		HTMLURL:     ptrOf("https://github.com/owner/repo/pull/2#pullrequestreview-7"),
-		State:       ptrOf(stateApproved),
+		ID:          new(int64(7)),
+		User:        &github.User{Login: new("carol")},
+		Body:        new("LGTM"),
+		HTMLURL:     new("https://github.com/owner/repo/pull/2#pullrequestreview-7"),
+		State:       new(stateApproved),
 		SubmittedAt: &github.Timestamp{Time: timestamp},
 	}
 
@@ -418,11 +415,11 @@ func TestReviewFromPullRequestReview(t *testing.T) {
 
 	timestamp := time.Date(2024, time.April, 10, 14, 30, 0, 0, time.UTC)
 	review := &github.PullRequestReview{
-		ID:          ptrOf(int64(55)),
-		User:        &github.User{Login: ptrOf("dave")},
-		Body:        ptrOf("please fix the imports"),
-		HTMLURL:     ptrOf("https://github.com/owner/repo/pull/3#pullrequestreview-55"),
-		State:       ptrOf(stateChangesRequested),
+		ID:          new(int64(55)),
+		User:        &github.User{Login: new("dave")},
+		Body:        new("please fix the imports"),
+		HTMLURL:     new("https://github.com/owner/repo/pull/3#pullrequestreview-55"),
+		State:       new(stateChangesRequested),
 		SubmittedAt: &github.Timestamp{Time: timestamp},
 	}
 
