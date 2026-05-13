@@ -13,7 +13,7 @@ import (
 func (c *Collector) collectMentions(ctx context.Context, agg *Aggregator) error {
 	c.logger.Debug("collecting mentions")
 
-	query := fmt.Sprintf("mentions:%s is:open updated:%s", c.username, c.timeRangeQuery())
+	query := fmt.Sprintf("mentions:%s is:issue is:open updated:%s", c.username, c.timeRangeQuery())
 
 	issues, err := c.searchIssues(ctx, query)
 	if err != nil {
