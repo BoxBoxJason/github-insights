@@ -50,7 +50,7 @@ func run(ctx context.Context) error {
 	flag.Var(&startFlag, "start", "Start date (RFC3339 or YYYY-MM-DD)")
 	flag.Var(&endFlag, "end", "End date (RFC3339 or YYYY-MM-DD, defaults to now)")
 	flag.Var(&outFlag, "out", "Output directory for JSON files")
-	flag.Var(&tokenFlag, "token", "GitHub token (overrides GITHUB_TOKEN and config file)")
+	flag.Var(&tokenFlag, "token", "GitHub token (optional; overrides GITHUB_TOKEN and config file)")
 	flag.Var(&usernameFlag, "username", "GitHub username to query (overrides GITHUB_USERNAME and config file)")
 	flag.Var(&maintainedFlag, "maintained", "Maintained repo list (repeatable, or comma-separated)")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose (debug-level) logging")
@@ -69,10 +69,6 @@ func run(ctx context.Context) error {
 	}
 
 	token := resolveToken(&rawConfig, tokenFlag)
-	if token == "" {
-		return errors.New("missing GitHub token: set GITHUB_TOKEN, --token, or config token")
-	}
-
 	username := resolveUsername(&rawConfig, usernameFlag)
 
 	startValue := rawConfig.Start
@@ -124,6 +120,10 @@ func run(ctx context.Context) error {
 	client := gh.NewClient(token)
 
 	if username == "" {
+		if token == "" {
+			return errors.New("missing GitHub username: set --username, GITHUB_USERNAME env var, or config username (required when no token is provided)")
+		}
+
 		resolved, authErr := gh.AuthenticatedUser(ctx, client)
 		if authErr != nil {
 			return fmt.Errorf("resolve authenticated user: %w", authErr)

@@ -20,9 +20,9 @@ Collect comprehensive activity insights from GitHub. Track your contributions—
 go install github.com/boxboxjason/github-insights@latest
 ```
 
-### 2. Set Up Authentication
+### 2. Set Up Authentication (Optional)
 
-Provide your GitHub token via environment variable:
+Optionally provide your GitHub token via environment variable. If not provided, you must specify a username:
 
 ```bash
 export GITHUB_TOKEN="your_github_personal_access_token"
@@ -62,7 +62,7 @@ github-insights \
 | `--maintained` | Comma-separated list of repos you maintain | No |
 | `--config` | Path to YAML config file | No |
 
-*If not provided via flag, will be resolved from environment variables or config file
+*Resolved from flag → environment variables → config file. If no token is provided, username becomes required.
 
 ### Configuration File
 
@@ -72,7 +72,7 @@ Create a `config.yaml` (or `config.yml`) in your working directory:
 username: octocat
 start: 2024-01-01
 end: 2024-03-31
-token: ghp_xxxxxx
+token: ghp_xxxxxx  # Optional; if not provided, username becomes required
 output_dir: ./results
 maintained_repos:
   - owner/repo1
@@ -145,7 +145,8 @@ github-insights --start 2024-01-01
 ## Requirements
 
 - Go 1.25.9 or later
-- GitHub personal access token with appropriate scopes (see below)
+- GitHub username (required if token is not provided)
+- GitHub personal access token (optional; with appropriate scopes for better rate limits)
 
 ### GitHub Token Scopes
 
@@ -157,13 +158,15 @@ For full functionality, your token should have access to:
 
 ## Troubleshooting
 
-### Missing GitHub Token
+### Missing GitHub Token or Username
+
+If no token is provided, you must specify a username:
 
 ```plaintext
-Error: missing GitHub token: set GITHUB_TOKEN, --token, or config token
+Error: missing GitHub username: set --username, GITHUB_USERNAME env var, or config username (required when no token is provided)
 ```
 
-Set your token via environment variable, flag, or config file.
+Provide either a GitHub token OR a username via environment variable, flag, or config file.
 
 ### Invalid Date Format
 
