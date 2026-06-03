@@ -1,3 +1,4 @@
 bin/
 results/
 config.yaml
+frontend/data.js

@@ -2,6 +2,8 @@
 
 Collect comprehensive activity insights from GitHub. Track your contributions—pull requests, code reviews, issues, mentions, and releases—across a date range and output structured data for reporting, analysis, or documentation.
 
+![Example visualization of collected insights in the Steam-themed viewer](./docs/example.png)
+
 ## Features
 
 - **Pull Request Tracking** — Capture all PRs you authored and reviewed
@@ -111,6 +113,28 @@ out/
 
 Each file contains structured data about your activity in that repository.
 
+## Viewer
+
+A static, Steam-themed web viewer lives in `frontend/`. It presents your collected
+reports as a "library" of repositories (game-capsule cards) with a per-repository
+detail view for PRs, reviews, issues, mentions, releases, and tags. No backend or
+build step is required — it runs from a single HTML file.
+
+Because browsers cannot list a directory, a small script bundles your JSON reports
+into `frontend/data.js` first:
+
+```bash
+make frontend-data        # bundles results/*.json -> frontend/data.js
+xdg-open frontend/index.html
+```
+
+The viewer reads from the `results/` directory by default. Re-run `make frontend-data`
+whenever you collect new reports, since the bundle is a snapshot. The generated
+`frontend/data.js` is gitignored, as it embeds the same private data as `results/`.
+
+> If your reports are in a different output directory, point the script at it or
+> copy them into `results/` before bundling.
+
 ## Examples
 
 ### Analyze Your Activity for Q1
@@ -199,6 +223,11 @@ internal/
     - collect_mentions.go
     - collect_maintainer.go
     - output.go
+frontend/                # Static Steam-themed viewer for the JSON reports
+  - index.html
+  - styles.css
+  - app.js
+  - generate.sh          # Bundles results/*.json into data.js
 ```
 
 ## Contributing
