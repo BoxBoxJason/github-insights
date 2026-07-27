@@ -3,7 +3,7 @@ module github.com/boxboxjason/github-insights
 go 1.26.2
 
 require (
-	github.com/google/go-github/v85 v85.0.0
+	github.com/google/go-github/v89 v89.0.0
 	github.com/google/go-github/v89 v89.0.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/sync v0.22.0
