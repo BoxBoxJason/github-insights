@@ -9,7 +9,6 @@ import (
 
 // Test-only constants for collect_network_test assertions.
 const (
-	approvedStatus   = "Approved"
 	reviewerUsername = "reviewer"
 )
 
@@ -247,8 +246,8 @@ func TestCollectAuthoredPRs(t *testing.T) {
 		t.Errorf("PR number = %d, want 5", prActivity.Number)
 	}
 
-	if prActivity.Status != approvedStatus {
-		t.Errorf("PR status = %q, want %s", prActivity.Status, approvedStatus)
+	if prActivity.Status != prStatusApproved {
+		t.Errorf("PR status = %q, want %s", prActivity.Status, prStatusApproved)
 	}
 
 	if len(prActivity.Reviewers) != 1 || prActivity.Reviewers[0] != reviewerUsername {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -62,7 +62,7 @@ func extractMentions(username string, issue *github.Issue, comments []*github.Is
 			Author:    issue.GetUser().GetLogin(),
 			Body:      issue.GetBody(),
 			CreatedAt: issue.GetCreatedAt().Time,
-			Source:    "issue_body",
+			Source:    srcIssueBody,
 		})
 	}
 
@@ -77,7 +77,7 @@ func extractMentions(username string, issue *github.Issue, comments []*github.Is
 			Author:    comment.GetUser().GetLogin(),
 			Body:      comment.GetBody(),
 			CreatedAt: comment.GetCreatedAt().Time,
-			Source:    "issue_comment",
+			Source:    srcIssueComment,
 		})
 	}
 

@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+//nolint:godoclint,goconst // test constants don't need individual doc comments
+const (
+	ownerVal   = "owner"
+	repoVal    = "repo"
+	ownerEmpty = "owner/empty"
+	ownerNil   = "owner/nil"
+	myOrgRepo  = "my-org/my-repo"
+	myOrg      = "my-org"
+	myRepo     = "my-repo"
+)
+
 // TestWriteRepoOutputs verifies file creation, JSON validity, directory
 // creation, and filtering behavior.
 //
@@ -20,17 +31,17 @@ func TestWriteRepoOutputs(t *testing.T) {
 
 	activityWithContent := &RepoActivity{
 		Repo:    testActivityKey,
-		Owner:   "owner",
-		Name:    "repo",
-		RepoURL: "https://github.com/owner/repo",
+		Owner:   ownerVal,
+		Name:    repoVal,
+		RepoURL: "https://github.com/" + ownerVal + "/" + repoVal,
 		Start:   now.Add(-24 * time.Hour),
 		End:     now,
-		Tags:    []TagActivity{{Name: "v1.0"}},
+		Tags:    []TagActivity{{Name: v1Release}},
 	}
 
 	activityEmpty := &RepoActivity{
-		Repo:  "owner/empty",
-		Owner: "owner",
+		Repo:  ownerEmpty,
+		Owner: ownerVal,
 		Name:  "empty",
 	}
 
@@ -64,7 +75,7 @@ func TestWriteRepoOutputs(t *testing.T) {
 
 		dir := t.TempDir()
 		activities := map[string]*RepoActivity{
-			"owner/empty": activityEmpty,
+			ownerEmpty: activityEmpty,
 		}
 
 		count, err := WriteRepoOutputs(dir, now, activities)
@@ -82,7 +93,7 @@ func TestWriteRepoOutputs(t *testing.T) {
 
 		dir := t.TempDir()
 		activities := map[string]*RepoActivity{
-			"owner/nil": nil,
+			ownerNil: nil,
 		}
 
 		count, err := WriteRepoOutputs(dir, now, activities)
@@ -172,10 +183,10 @@ func TestWriteRepoOutputs(t *testing.T) {
 
 		dir := t.TempDir()
 		activities := map[string]*RepoActivity{
-			"my-org/my-repo": {
-				Repo:  "my-org/my-repo",
-				Owner: "my-org",
-				Name:  "my-repo",
+			myOrgRepo: {
+				Repo:  myOrgRepo,
+				Owner: myOrg,
+				Name:  myRepo,
 				Tags:  []TagActivity{{Name: "v2.0"}},
 			},
 		}

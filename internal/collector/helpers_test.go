@@ -5,17 +5,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
 )
 
 // Test-only constants shared across collector package test files.
+//
+//nolint:goconst // test constants are intentionally reused across test files
 const (
 	testUserAlice         = "alice"
 	stateApproved         = "APPROVED"
 	stateChangesRequested = "CHANGES_REQUESTED"
-	srcIssueBody          = "issue_body"
-	srcIssueComment       = "issue_comment"
 	testActivityKey       = "owner/repo"
+	onlyStr               = "only"
+	myowner               = "myowner"
+	myrepo                = "myrepo"
+	owner                 = "owner"
+	repo                  = "repo"
+	bob                   = "bob"
+	nilReviewSkippedMsg   = "nil review in slice is skipped"
+	mergedTest            = "merged"
+	v1Release             = "v1.0"
 )
 
 // sliceEqual reports whether two string slices are equal.
@@ -68,7 +77,7 @@ func TestUniqueStrings(t *testing.T) {
 		{name: "skips empty strings", input: []string{"a", "", "b"}, want: []string{"a", "b"}},
 		{name: "all empty strings", input: []string{"", "", ""}, want: nil},
 		{name: "preserves insertion order", input: []string{"z", "y", "x"}, want: []string{"z", "y", "x"}},
-		{name: "single element", input: []string{"only"}, want: []string{"only"}},
+		{name: "single element", input: []string{onlyStr}, want: []string{onlyStr}},
 	}
 
 	for _, testCase := range tests {
@@ -135,21 +144,21 @@ func TestRepoFromIssue(t *testing.T) {
 	}{
 		{
 			name:      "repository_url gives owner and repo",
-			repoURL:   "https://api.github.com/repos/myowner/myrepo",
-			wantOwner: "myowner",
-			wantRepo:  "myrepo",
+			repoURL:   "https://api.github.com/repos/" + myowner + "/" + myrepo,
+			wantOwner: myowner,
+			wantRepo:  myrepo,
 		},
 		{
 			name:      "trailing slash in repository_url is trimmed",
-			repoURL:   "https://api.github.com/repos/owner/repo/",
-			wantOwner: "owner",
-			wantRepo:  "repo",
+			repoURL:   "https://api.github.com/repos/" + owner + "/" + repo + "/",
+			wantOwner: owner,
+			wantRepo:  repo,
 		},
 		{
 			name:      "falls back to url when repository_url is empty",
-			rawURL:    "https://api.github.com/repos/owner/repo",
-			wantOwner: "owner",
-			wantRepo:  "repo",
+			rawURL:    "https://api.github.com/repos/" + owner + "/" + repo,
+			wantOwner: owner,
+			wantRepo:  repo,
 		},
 		{
 			name:    "error when both urls are empty",
@@ -279,13 +288,13 @@ func TestReviewersFromReviews(t *testing.T) {
 			name: "deduplicates repeated reviewer",
 			reviews: []*github.PullRequestReview{
 				makeReviewByUser(testUserAlice, stateApproved, now),
-				makeReviewByUser("bob", stateApproved, now),
+				makeReviewByUser(bob, stateApproved, now),
 				makeReviewByUser(testUserAlice, stateChangesRequested, now),
 			},
-			want: []string{testUserAlice, "bob"},
+			want: []string{testUserAlice, bob},
 		},
 		{
-			name:    "nil review in slice is skipped",
+			name:    nilReviewSkippedMsg,
 			reviews: []*github.PullRequestReview{nil},
 			want:    nil,
 		},
@@ -332,8 +341,8 @@ func TestCommentFromIssueComment(t *testing.T) {
 		t.Errorf("Body = %q, want 'looks good'", got.Body)
 	}
 
-	if got.Type != "issue_comment" {
-		t.Errorf("Type = %q, want issue_comment", got.Type)
+	if got.Type != srcIssueComment {
+		t.Errorf("Type = %q, want %s", got.Type, srcIssueComment)
 	}
 
 	if !got.CreatedAt.Equal(timestamp) {
@@ -349,7 +358,7 @@ func TestCommentFromReviewComment(t *testing.T) {
 	timestamp := time.Date(2024, time.February, 1, 12, 0, 0, 0, time.UTC)
 	comment := &github.PullRequestComment{
 		ID:        new(int64(99)),
-		User:      &github.User{Login: new("bob")},
+		User:      &github.User{Login: new(bob)},
 		Body:      new("nit: formatting"),
 		HTMLURL:   new("https://github.com/owner/repo/pull/5#discussion_r99"),
 		CreatedAt: &github.Timestamp{Time: timestamp},
@@ -361,12 +370,12 @@ func TestCommentFromReviewComment(t *testing.T) {
 		t.Errorf("ID = %d, want 99", got.ID)
 	}
 
-	if got.Author != "bob" {
-		t.Errorf("Author = %q, want bob", got.Author)
+	if got.Author != bob {
+		t.Errorf("Author = %q, want %s", got.Author, bob)
 	}
 
-	if got.Type != "review_comment" {
-		t.Errorf("Type = %q, want review_comment", got.Type)
+	if got.Type != srcReviewComment {
+		t.Errorf("Type = %q, want %s", got.Type, srcReviewComment)
 	}
 
 	if !got.CreatedAt.Equal(timestamp) {
@@ -399,8 +408,8 @@ func TestCommentFromReview(t *testing.T) {
 		t.Errorf("Author = %q, want carol", got.Author)
 	}
 
-	if got.Type != "review" {
-		t.Errorf("Type = %q, want review", got.Type)
+	if got.Type != srcReview {
+		t.Errorf("Type = %q, want %s", got.Type, srcReview)
 	}
 
 	if !got.CreatedAt.Equal(timestamp) {

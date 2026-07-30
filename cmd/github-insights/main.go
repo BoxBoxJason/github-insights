@@ -117,7 +117,10 @@ func run(ctx context.Context) error {
 		maintainedRepos = maintainedFlag.Values
 	}
 
-	client := gh.NewClient(token)
+	client, err := gh.NewClient(token)
+	if err != nil {
+		return fmt.Errorf("create github client: %w", err)
+	}
 
 	if username == "" {
 		if token == "" {

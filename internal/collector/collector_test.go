@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+//nolint:godoclint,golint // test constants don't need doc comments
+//nolint:goconst,nolintlint // test constants are intentionally reused across test files
+const (
+	ownerTest = "owner"
+	repoTest  = "repo"
+	myOrgTest = "my-org"
+)
+
 // TestNormalizeRepo verifies that normalizeRepo correctly splits owner/repo
 // strings and rejects invalid forms.
 //
@@ -24,14 +32,14 @@ func TestNormalizeRepo(t *testing.T) {
 	}{
 		{
 			name:      "valid owner/repo",
-			input:     "owner/repo",
-			wantOwner: "owner",
-			wantRepo:  "repo",
+			input:     ownerTest + "/" + repoTest,
+			wantOwner: ownerTest,
+			wantRepo:  repoTest,
 		},
 		{
 			name:      "valid with org name",
-			input:     "my-org/my-project",
-			wantOwner: "my-org",
+			input:     myOrgTest + "/my-project",
+			wantOwner: myOrgTest,
 			wantRepo:  "my-project",
 		},
 		{

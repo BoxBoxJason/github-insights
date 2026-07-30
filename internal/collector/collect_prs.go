@@ -6,8 +6,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
 	"golang.org/x/sync/errgroup"
+)
+
+//nolint:godoclint // status constants are used internally
+const (
+	prStatusMerged         = "Merged"
+	prStatusDraft          = "Draft"
+	prStatusAwaitingReview = "Awaiting Review"
+	prStatusChangesNeeded  = "Changes Needed"
+	prStatusApproved       = "Approved"
+	prStatusOpen           = "Open"
+	prStatusClosed         = "Closed"
 )
 
 // collectAuthoredPRs fetches pull requests authored by the tracked user
@@ -172,29 +183,29 @@ func buildPullRequestActivity(pullReq *github.PullRequest, reviews []*github.Pul
 // its reviews.
 func prStatus(pullReq *github.PullRequest, reviews []*github.PullRequestReview) string {
 	if pullReq.GetMerged() {
-		return "Merged"
+		return prStatusMerged
 	}
 
 	if strings.EqualFold(pullReq.GetState(), "open") {
 		if pullReq.GetDraft() {
-			return "Draft"
+			return prStatusDraft
 		}
 
 		if len(reviews) == 0 {
-			return "Awaiting Review"
+			return prStatusAwaitingReview
 		}
 
 		switch latestReviewState(reviews) {
 		case "CHANGES_REQUESTED":
-			return "Changes Needed"
+			return prStatusChangesNeeded
 		case "APPROVED":
-			return "Approved"
+			return prStatusApproved
 		}
 
-		return "Open"
+		return prStatusOpen
 	}
 
-	return "Closed"
+	return prStatusClosed
 }
 
 // filterReviewsByUser returns reviews submitted by the given username

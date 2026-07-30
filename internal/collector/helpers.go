@@ -6,7 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
+)
+
+//nolint:godoclint // source constants are used internally
+const (
+	srcIssueBody     = "issue_body"
+	srcIssueComment  = "issue_comment"
+	srcReviewComment = "review_comment"
+	srcReview        = "review"
 )
 
 // repoFromIssue extracts the owner and repo name from an issue's
@@ -108,7 +116,7 @@ func commentFromIssueComment(comment *github.IssueComment) Comment {
 		Author:    comment.GetUser().GetLogin(),
 		Body:      comment.GetBody(),
 		URL:       comment.GetHTMLURL(),
-		Type:      "issue_comment",
+		Type:      srcIssueComment,
 		CreatedAt: comment.GetCreatedAt().Time,
 	}
 }
@@ -121,7 +129,7 @@ func commentFromReviewComment(comment *github.PullRequestComment) Comment {
 		Author:    comment.GetUser().GetLogin(),
 		Body:      comment.GetBody(),
 		URL:       comment.GetHTMLURL(),
-		Type:      "review_comment",
+		Type:      srcReviewComment,
 		CreatedAt: comment.GetCreatedAt().Time,
 	}
 }
@@ -134,7 +142,7 @@ func commentFromReview(review *github.PullRequestReview) Comment {
 		Author:    review.GetUser().GetLogin(),
 		Body:      review.GetBody(),
 		URL:       review.GetHTMLURL(),
-		Type:      "review",
+		Type:      srcReview,
 		CreatedAt: review.GetSubmittedAt().Time,
 	}
 }

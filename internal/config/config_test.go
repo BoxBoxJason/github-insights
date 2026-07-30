@@ -9,7 +9,10 @@ import (
 )
 
 // discoveredUsername is the username written into auto-discovered config files.
-const discoveredUsername = "foundme"
+const (
+	discoveredUsername = "foundme"
+	dateStr            = "2024-01-15"
+)
 
 // TestParseDate verifies date parsing for RFC3339 and YYYY-MM-DD formats.
 //
@@ -31,13 +34,13 @@ func TestParseDate(t *testing.T) {
 		},
 		{
 			name:  "YYYY-MM-DD start of day",
-			value: "2024-01-15",
+			value: dateStr,
 			isEnd: false,
 			want:  time.Date(2024, time.January, 15, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			name:  "YYYY-MM-DD end of day",
-			value: "2024-01-15",
+			value: dateStr,
 			isEnd: true,
 			want:  time.Date(2024, time.January, 15, 23, 59, 59, 0, time.UTC),
 		},

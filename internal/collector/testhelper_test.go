@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
 	"go.uber.org/zap"
 )
 
@@ -20,17 +19,20 @@ import (
 func newTestCollector(t *testing.T, mux *http.ServeMux) *Collector {
 	t.Helper()
 
-	server := httptest.NewServer(mux)
+	wrappedMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/api/v3")
+		mux.ServeHTTP(w, r)
+	})
+
+	server := httptest.NewServer(wrappedMux)
 	t.Cleanup(server.Close)
 
-	baseURL, err := url.Parse(server.URL + "/")
-	if err != nil {
-		t.Fatalf("parse test server URL: %v", err)
-	}
+	baseURL := server.URL + "/"
 
-	client := github.NewClient(nil)
-	client.BaseURL = baseURL
-	client.UploadURL = baseURL
+	client, err := github.NewClient(github.WithEnterpriseURLs(baseURL, baseURL))
+	if err != nil {
+		t.Fatalf("create github client: %v", err)
+	}
 
 	return &Collector{
 		client:   client,
@@ -74,7 +76,7 @@ func prIssueJSON(number int, owner, repo string) string {
 
 // prJSON returns minimal JSON for a PullRequest.
 func prJSON(number int, state string) string {
-	merged := state == "merged"
+	merged := state == mergedTest
 	actualState := state
 
 	if merged {

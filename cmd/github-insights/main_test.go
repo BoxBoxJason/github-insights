@@ -6,6 +6,20 @@ import (
 	"github.com/boxboxjason/github-insights/internal/config"
 )
 
+//nolint:godoclint,golint // test constants don't need doc comments
+const (
+	configToken          = "config-token"
+	configUser           = "config-user"
+	envToken             = "env-token"
+	envUser              = "env-user"
+	flagToken            = "flag-token"
+	flagUser             = "flag-user"
+	myval                = "myval"
+	envOverridesConfig   = "env overrides config"
+	flagOverridesEnvCfg  = "flag overrides env and config"
+	flagNotSetOverrideEn = "flag not set does not override env"
+)
+
 // TestResolveToken verifies that resolveToken respects flag > env > config
 // priority.
 func TestResolveToken(t *testing.T) {
@@ -18,28 +32,28 @@ func TestResolveToken(t *testing.T) {
 	}{
 		{
 			name:     "config token used when no env or flag",
-			rawToken: "config-token",
-			want:     "config-token",
+			rawToken: configToken,
+			want:     configToken,
 		},
 		{
-			name:     "env overrides config",
-			rawToken: "config-token",
-			envToken: "env-token",
-			want:     "env-token",
+			name:     envOverridesConfig,
+			rawToken: configToken,
+			envToken: envToken,
+			want:     envToken,
 		},
 		{
-			name:      "flag overrides env and config",
-			rawToken:  "config-token",
-			envToken:  "env-token",
-			flagToken: stringFlag{Value: "flag-token", IsSet: true},
-			want:      "flag-token",
+			name:      flagOverridesEnvCfg,
+			rawToken:  configToken,
+			envToken:  envToken,
+			flagToken: stringFlag{Value: flagToken, IsSet: true},
+			want:      flagToken,
 		},
 		{
-			name:      "flag not set does not override env",
-			rawToken:  "config-token",
-			envToken:  "env-token",
+			name:      flagNotSetOverrideEn,
+			rawToken:  configToken,
+			envToken:  envToken,
 			flagToken: stringFlag{Value: "", IsSet: false},
-			want:      "env-token",
+			want:      envToken,
 		},
 		{
 			name: "all empty returns empty",
@@ -77,28 +91,28 @@ func TestResolveUsername(t *testing.T) {
 	}{
 		{
 			name:        "config username used when no env or flag",
-			rawUsername: "config-user",
-			want:        "config-user",
+			rawUsername: configUser,
+			want:        configUser,
 		},
 		{
-			name:        "env overrides config",
-			rawUsername: "config-user",
-			envUsername: "env-user",
-			want:        "env-user",
+			name:        envOverridesConfig,
+			rawUsername: configUser,
+			envUsername: envUser,
+			want:        envUser,
 		},
 		{
-			name:        "flag overrides env and config",
-			rawUsername: "config-user",
-			envUsername: "env-user",
-			flagUser:    stringFlag{Value: "flag-user", IsSet: true},
-			want:        "flag-user",
+			name:        flagOverridesEnvCfg,
+			rawUsername: configUser,
+			envUsername: envUser,
+			flagUser:    stringFlag{Value: flagUser, IsSet: true},
+			want:        flagUser,
 		},
 		{
-			name:        "flag not set does not override env",
-			rawUsername: "config-user",
-			envUsername: "env-user",
+			name:        flagNotSetOverrideEn,
+			rawUsername: configUser,
+			envUsername: envUser,
 			flagUser:    stringFlag{Value: "", IsSet: false},
-			want:        "env-user",
+			want:        envUser,
 		},
 	}
 
@@ -156,10 +170,10 @@ func TestStringFlag(t *testing.T) {
 	t.Run("String returns current value", func(t *testing.T) {
 		t.Parallel()
 
-		flag := stringFlag{Value: "myval"}
+		flag := stringFlag{Value: myval}
 
-		if flag.String() != "myval" {
-			t.Errorf("String() = %q, want myval", flag.String())
+		if flag.String() != myval {
+			t.Errorf("String() = %q, want %s", flag.String(), myval)
 		}
 	})
 }

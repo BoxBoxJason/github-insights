@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+//nolint:goconst,godoclint // test constants are intentionally reused across test files, and don't need individual docs
+const (
+	myownerVal = "myowner"
+	myrepoVal  = "myrepo"
+)
+
 // TestRepoActivityHasContent verifies that HasContent returns true when any
 // activity slice is non-empty.
 //
@@ -58,12 +64,12 @@ func TestRepoActivityHasContent(t *testing.T) {
 		},
 		{
 			name:   "has releases",
-			modify: func(r *RepoActivity) { r.Releases = []ReleaseActivity{{Title: "v1.0"}} },
+			modify: func(r *RepoActivity) { r.Releases = []ReleaseActivity{{Title: v1Release}} },
 			want:   true,
 		},
 		{
 			name:   "has tags",
-			modify: func(r *RepoActivity) { r.Tags = []TagActivity{{Name: "v1.0"}} },
+			modify: func(r *RepoActivity) { r.Tags = []TagActivity{{Name: v1Release}} },
 			want:   true,
 		},
 	}
@@ -121,20 +127,20 @@ func TestAggregator_getRepoCreatesCorrectActivity(t *testing.T) {
 		t.Fatal("expected activity for myowner/myrepo, not found")
 	}
 
-	if act.Repo != "myowner/myrepo" {
-		t.Errorf("Repo = %q, want myowner/myrepo", act.Repo)
+	if act.Repo != myownerVal+"/"+myrepoVal {
+		t.Errorf("Repo = %q, want %s/%s", act.Repo, myownerVal, myrepoVal)
 	}
 
-	if act.Owner != "myowner" {
-		t.Errorf("Owner = %q, want myowner", act.Owner)
+	if act.Owner != myownerVal {
+		t.Errorf("Owner = %q, want %s", act.Owner, myownerVal)
 	}
 
-	if act.Name != "myrepo" {
-		t.Errorf("Name = %q, want myrepo", act.Name)
+	if act.Name != myrepoVal {
+		t.Errorf("Name = %q, want %s", act.Name, myrepoVal)
 	}
 
-	if act.RepoURL != "https://github.com/myowner/myrepo" {
-		t.Errorf("RepoURL = %q, want https://github.com/myowner/myrepo", act.RepoURL)
+	if act.RepoURL != "https://github.com/"+myownerVal+"/"+myrepoVal {
+		t.Errorf("RepoURL = %q, want https://github.com/%s/%s", act.RepoURL, myownerVal, myrepoVal)
 	}
 
 	if !act.Start.Equal(start) {
