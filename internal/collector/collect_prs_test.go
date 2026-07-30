@@ -5,7 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
+)
+
+//nolint:godoclint,golint // test constants don't need doc comments
+const (
+	draftTest            = "draft"
+	awaitingReviewTest   = "open with no reviews awaits review"
+	approvedTest         = "approved"
+	changesRequestedTest = "changes requested"
+	openTest             = "open with unrecognized review state falls back to Open"
+	closedTest           = "closed non-merged"
 )
 
 // openPR returns a minimal open PullRequest for use in tests.
@@ -29,38 +39,38 @@ func TestPRStatus(t *testing.T) {
 		want    string
 	}{
 		{
-			name: "merged",
+			name: mergedTest,
 			pr:   &github.PullRequest{Merged: new(true), State: new("closed")},
-			want: "Merged",
+			want: prStatusMerged,
 		},
 		{
-			name: "draft",
+			name: draftTest,
 			pr:   &github.PullRequest{State: new("open"), Draft: new(true)},
-			want: "Draft",
+			want: prStatusDraft,
 		},
 		{
-			name:    "open with no reviews awaits review",
+			name:    awaitingReviewTest,
 			pr:      openPR(),
 			reviews: nil,
-			want:    "Awaiting Review",
+			want:    prStatusAwaitingReview,
 		},
 		{
 			name:    "open with empty reviews awaits review",
 			pr:      openPR(),
 			reviews: []*github.PullRequestReview{},
-			want:    "Awaiting Review",
+			want:    prStatusAwaitingReview,
 		},
 		{
-			name:    "approved",
+			name:    approvedTest,
 			pr:      openPR(),
 			reviews: []*github.PullRequestReview{makeReview(stateApproved, now)},
-			want:    "Approved",
+			want:    prStatusApproved,
 		},
 		{
-			name:    "changes requested",
+			name:    changesRequestedTest,
 			pr:      openPR(),
 			reviews: []*github.PullRequestReview{makeReview(stateChangesRequested, now)},
-			want:    "Changes Needed",
+			want:    prStatusChangesNeeded,
 		},
 		{
 			name: "most recent review wins: approved after changes requested",
@@ -69,7 +79,7 @@ func TestPRStatus(t *testing.T) {
 				makeReview(stateChangesRequested, now.Add(-time.Hour)),
 				makeReview(stateApproved, now),
 			},
-			want: "Approved",
+			want: prStatusApproved,
 		},
 		{
 			name: "most recent review wins: changes requested after approved",
@@ -78,18 +88,18 @@ func TestPRStatus(t *testing.T) {
 				makeReview(stateApproved, now.Add(-time.Hour)),
 				makeReview(stateChangesRequested, now),
 			},
-			want: "Changes Needed",
+			want: prStatusChangesNeeded,
 		},
 		{
-			name:    "open with unrecognized review state falls back to Open",
+			name:    openTest,
 			pr:      openPR(),
 			reviews: []*github.PullRequestReview{makeReview("COMMENTED", now)},
-			want:    "Open",
+			want:    prStatusOpen,
 		},
 		{
-			name: "closed non-merged",
+			name: closedTest,
 			pr:   &github.PullRequest{State: new("closed")},
-			want: "Closed",
+			want: prStatusClosed,
 		},
 	}
 
@@ -137,7 +147,7 @@ func TestFilterReviewsByUser(t *testing.T) {
 			name: "matches by login",
 			reviews: []*github.PullRequestReview{
 				makeReviewByUser(testUserAlice, stateApproved, now),
-				makeReviewByUser("bob", stateApproved, now),
+				makeReviewByUser(bob, stateApproved, now),
 			},
 			username: testUserAlice,
 			wantLen:  1,
@@ -159,7 +169,7 @@ func TestFilterReviewsByUser(t *testing.T) {
 			wantLen:  0,
 		},
 		{
-			name:     "nil review in slice is skipped",
+			name:     nilReviewSkippedMsg,
 			reviews:  []*github.PullRequestReview{nil},
 			username: testUserAlice,
 			wantLen:  0,

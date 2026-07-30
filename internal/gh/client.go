@@ -4,22 +4,30 @@ package gh
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v89/github"
 )
 
 // httpTimeout is the HTTP client timeout for all GitHub API calls.
 const httpTimeout = 30 * time.Second
 
 // NewClient constructs an authenticated GitHub client using the given token.
-func NewClient(token string) *github.Client {
+func NewClient(token string) (*github.Client, error) {
 	httpClient := &http.Client{Timeout: httpTimeout}
-	ghClient := github.NewClient(httpClient).WithAuthToken(token)
-	ghClient.UserAgent = "github-insights"
 
-	return ghClient
+	ghClient, err := github.NewClient(
+		github.WithHTTPClient(httpClient),
+		github.WithAuthToken(token),
+		github.WithUserAgent("github-insights"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("creating github client: %w", err)
+	}
+
+	return ghClient, nil
 }
 
 // AuthenticatedUser returns the login name of the authenticated user.
