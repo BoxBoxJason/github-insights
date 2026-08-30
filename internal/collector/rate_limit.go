@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/go-github/v89/github"
+	"github.com/google/go-github/v90/github"
 	"go.uber.org/zap"
 )
 
@@ -84,8 +84,7 @@ func (c *Collector) call(ctx context.Context, fn func() (*github.Response, error
 			return nil
 		}
 
-		var rateErr *github.RateLimitError
-		if errors.As(err, &rateErr) {
+		if rateErr, ok := errors.AsType[*github.RateLimitError](err); ok {
 			c.logger.Debug("rate limit error, waiting for reset",
 				zap.Time("retry_after", rateErr.Rate.Reset.Time),
 			)
@@ -98,8 +97,7 @@ func (c *Collector) call(ctx context.Context, fn func() (*github.Response, error
 			continue
 		}
 
-		var abuseErr *github.AbuseRateLimitError
-		if errors.As(err, &abuseErr) {
+		if abuseErr, ok := errors.AsType[*github.AbuseRateLimitError](err); ok {
 			delay := defaultAbuseDelay
 			if abuseErr.RetryAfter != nil {
 				delay = *abuseErr.RetryAfter
