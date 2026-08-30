@@ -3,7 +3,7 @@ package collector
 import (
 	"context"
 
-	"github.com/google/go-github/v89/github"
+	"github.com/google/go-github/v90/github"
 )
 
 // searchIssues runs a GitHub issue search query and returns all matching
