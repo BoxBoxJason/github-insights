@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 )
 
 //nolint:godoclint,golint // test constants don't need doc comments
