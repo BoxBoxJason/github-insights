@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/utils/ptr"
