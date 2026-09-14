@@ -160,10 +160,28 @@ github-insights \
 
 ### Auto-Discover Maintained Repos
 
-If you don't specify `--maintained`, the tool automatically discovers repositories where you have admin, maintain, or push permissions:
+If you omit `--maintained` (and `maintained_repos` isn't set in the config file), and you're analyzing the token owner themselves, the tool automatically discovers repositories where that user has admin, maintain, or push permissions:
 
 ```bash
 github-insights --start 2024-01-01
+```
+
+This discovery is always scoped to the authenticated token — the GitHub API has no way to list "repos user X can push to" for an arbitrary `X`. So if `--username`/`GITHUB_USERNAME` names someone other than the token owner, auto-discovery is skipped automatically (with a log warning) instead of silently substituting the token owner's repos into that user's report. Pass `--maintained` explicitly if you know which repos to track in that case:
+
+```bash
+GITHUB_USERNAME="someone-else" github-insights --start 2024-01-01 --maintained owner/repo,owner/other-repo
+```
+
+To explicitly opt out of maintainer/release/tag tracking even when analyzing yourself, pass an empty list rather than omitting the flag:
+
+```bash
+github-insights --start 2024-01-01 --username someone-else --maintained ""
+```
+
+or in the config file:
+
+```yaml
+maintained_repos: []
 ```
 
 ## Requirements

@@ -271,3 +271,73 @@ func TestStringSliceFlag(t *testing.T) {
 		}
 	})
 }
+
+// TestShouldSkipMaintainedDiscovery verifies that auto-discovery is skipped
+// only when maintainedRepos is unset (nil) and the analyzed username
+// differs from the authenticated token owner.
+func TestShouldSkipMaintainedDiscovery(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name                  string
+		maintainedRepos       []string
+		username              string
+		authenticatedUsername string
+		want                  bool
+	}{
+		{
+			name:                  "unset repos, different user than token owner",
+			maintainedRepos:       nil,
+			username:              "AYDEV-FR",
+			authenticatedUsername: "BoxBoxJason",
+			want:                  true,
+		},
+		{
+			name:                  "unset repos, same user as token owner",
+			maintainedRepos:       nil,
+			username:              "BoxBoxJason",
+			authenticatedUsername: "BoxBoxJason",
+			want:                  false,
+		},
+		{
+			name:                  "unset repos, same user, different case",
+			maintainedRepos:       nil,
+			username:              "boxboxjason",
+			authenticatedUsername: "BoxBoxJason",
+			want:                  false,
+		},
+		{
+			name:                  "explicit empty repos, different user",
+			maintainedRepos:       []string{},
+			username:              "AYDEV-FR",
+			authenticatedUsername: "BoxBoxJason",
+			want:                  false,
+		},
+		{
+			name:                  "explicit non-empty repos, different user",
+			maintainedRepos:       []string{"owner/repo"},
+			username:              "AYDEV-FR",
+			authenticatedUsername: "BoxBoxJason",
+			want:                  false,
+		},
+		{
+			name:                  "no token (unauthenticated), unset repos",
+			maintainedRepos:       nil,
+			username:              "AYDEV-FR",
+			authenticatedUsername: "",
+			want:                  false,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := shouldSkipMaintainedDiscovery(testCase.maintainedRepos, testCase.username, testCase.authenticatedUsername)
+			if got != testCase.want {
+				t.Errorf("shouldSkipMaintainedDiscovery(%v, %q, %q) = %v, want %v",
+					testCase.maintainedRepos, testCase.username, testCase.authenticatedUsername, got, testCase.want)
+			}
+		})
+	}
+}

@@ -12,6 +12,75 @@ const (
 	reviewerUsername = "reviewer"
 )
 
+// TestResolveMaintainedRepos_NilTriggersDiscovery verifies that a nil
+// maintainedRepos (flag/config unset) falls back to auto-discovery.
+func TestResolveMaintainedRepos_NilTriggersDiscovery(t *testing.T) {
+	t.Parallel()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/user/repos", jsonHandler(`[
+		{"full_name":"owner/repo-admin","permissions":{"admin":true,"maintain":false,"push":false}}
+	]`))
+
+	col := newTestCollector(t, mux)
+
+	repos, err := col.resolveMaintainedRepos(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("resolveMaintainedRepos() error = %v", err)
+	}
+
+	if len(repos) != 1 || repos[0] != "owner/repo-admin" {
+		t.Errorf("repos = %v, want [owner/repo-admin] from discovery", repos)
+	}
+}
+
+// TestResolveMaintainedRepos_ExplicitEmptySkipsDiscovery verifies that an
+// explicit empty maintainedRepos (flag/config set to an empty list) skips
+// auto-discovery instead of falling back to the token owner's repos.
+func TestResolveMaintainedRepos_ExplicitEmptySkipsDiscovery(t *testing.T) {
+	t.Parallel()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/user/repos", func(_ http.ResponseWriter, _ *http.Request) {
+		t.Fatal("discoverMaintainedRepos should not be called when maintainedRepos is explicitly empty")
+	})
+
+	col := newTestCollector(t, mux)
+
+	repos, err := col.resolveMaintainedRepos(context.Background(), []string{})
+	if err != nil {
+		t.Fatalf("resolveMaintainedRepos() error = %v", err)
+	}
+
+	if len(repos) != 0 {
+		t.Errorf("repos = %v, want empty", repos)
+	}
+}
+
+// TestResolveMaintainedRepos_ExplicitListSkipsDiscovery verifies that an
+// explicit non-empty maintainedRepos is used as-is without discovery.
+func TestResolveMaintainedRepos_ExplicitListSkipsDiscovery(t *testing.T) {
+	t.Parallel()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/user/repos", func(_ http.ResponseWriter, _ *http.Request) {
+		t.Fatal("discoverMaintainedRepos should not be called when maintainedRepos is explicitly set")
+	})
+
+	col := newTestCollector(t, mux)
+
+	want := []string{"owner/explicit-repo"}
+
+	repos, err := col.resolveMaintainedRepos(context.Background(), want)
+	if err != nil {
+		t.Fatalf("resolveMaintainedRepos() error = %v", err)
+	}
+
+	if len(repos) != 1 || repos[0] != want[0] {
+		t.Errorf("repos = %v, want %v", repos, want)
+	}
+}
+
 // TestDiscoverMaintainedRepos verifies that only repos with
 // push/maintain/admin perms are returned.
 func TestDiscoverMaintainedRepos(t *testing.T) {

@@ -112,9 +112,15 @@ func run(ctx context.Context) error {
 
 	outputDir = filepath.Clean(outputDir)
 
+	// maintainedRepos is nil when neither the flag nor the config file
+	// specify a list (auto-discovery is allowed), and non-nil (possibly
+	// empty) when either explicitly sets one (auto-discovery is skipped).
 	maintainedRepos := rawConfig.MaintainedRepos
 	if maintainedFlag.IsSet {
 		maintainedRepos = maintainedFlag.Values
+		if maintainedRepos == nil {
+			maintainedRepos = []string{}
+		}
 	}
 
 	client, err := gh.NewClient(token)
@@ -122,17 +128,36 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("create github client: %w", err)
 	}
 
+	var authenticatedUsername string
+
+	if token != "" {
+		authenticatedUsername, err = gh.AuthenticatedUser(ctx, client)
+		if err != nil {
+			return fmt.Errorf("resolve authenticated user: %w", err)
+		}
+	}
+
 	if username == "" {
-		if token == "" {
+		if authenticatedUsername == "" {
 			return errors.New("missing GitHub username: set --username, GITHUB_USERNAME env var, or config username (required when no token is provided)")
 		}
 
-		resolved, authErr := gh.AuthenticatedUser(ctx, client)
-		if authErr != nil {
-			return fmt.Errorf("resolve authenticated user: %w", authErr)
-		}
+		username = authenticatedUsername
+	}
 
-		username = resolved
+	// Auto-discovery of maintained repos only ever reflects the token
+	// owner's permissions (the GitHub API has no way to list repos an
+	// arbitrary other user can push to). If maintainedRepos wasn't
+	// explicitly set and we're analyzing a different user than the token
+	// owner, skip discovery instead of silently substituting the token
+	// owner's repos into someone else's report.
+	if shouldSkipMaintainedDiscovery(maintainedRepos, username, authenticatedUsername) {
+		logger.Warn("skipping maintained-repo auto-discovery: analyzing a different user than the authenticated token; pass --maintained to track specific repos",
+			zap.String("username", username),
+			zap.String("token_owner", authenticatedUsername),
+		)
+
+		maintainedRepos = []string{}
 	}
 
 	col := collector.New(client, collector.Options{
@@ -210,6 +235,16 @@ func resolveToken(raw *config.RawConfig, tokenFlag stringFlag) string {
 	}
 
 	return token
+}
+
+// shouldSkipMaintainedDiscovery reports whether maintained-repo
+// auto-discovery should be skipped because maintainedRepos was left unset
+// (nil) while analyzing a user other than the authenticated token owner —
+// discovery can only ever reflect the token owner's permissions, so
+// running it in that case would silently substitute the wrong user's
+// repos.
+func shouldSkipMaintainedDiscovery(maintainedRepos []string, username, authenticatedUsername string) bool {
+	return maintainedRepos == nil && authenticatedUsername != "" && !strings.EqualFold(username, authenticatedUsername)
 }
 
 // resolveUsername returns the GitHub username, with flag > env > config

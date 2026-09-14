@@ -70,15 +70,9 @@ func (c *Collector) Collect(ctx context.Context, maintainedRepos []string) (map[
 		zap.Time("to", c.end),
 	)
 
-	repos := maintainedRepos
-
-	if len(repos) == 0 {
-		discovered, err := c.discoverMaintainedRepos(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		repos = discovered
+	repos, err := c.resolveMaintainedRepos(ctx, maintainedRepos)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(repos) == 0 {
@@ -121,12 +115,27 @@ func (c *Collector) Collect(ctx context.Context, maintainedRepos []string) (map[
 		})
 	}
 
-	err := group.Wait()
+	err = group.Wait()
 	if err != nil {
 		return nil, err //nolint:wrapcheck // errgroup propagates the underlying error
 	}
 
 	return agg.Activities(), nil
+}
+
+// resolveMaintainedRepos returns the repos to treat as "maintained" for this
+// run. A nil maintainedRepos means neither the flag nor the config file
+// specified a list, so it auto-discovers repos the authenticated token can
+// push to. A non-nil (possibly empty) maintainedRepos means the caller
+// explicitly chose a list, including an explicit empty list to opt out of
+// maintainer/release/tag tracking entirely — in that case discovery is
+// skipped rather than silently falling back to the token owner's repos.
+func (c *Collector) resolveMaintainedRepos(ctx context.Context, maintainedRepos []string) ([]string, error) {
+	if maintainedRepos != nil {
+		return maintainedRepos, nil
+	}
+
+	return c.discoverMaintainedRepos(ctx)
 }
 
 // discoverMaintainedRepos returns all repos the authenticated user has
