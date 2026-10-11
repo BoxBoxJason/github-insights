@@ -6,7 +6,7 @@ import (
 	"github.com/boxboxjason/github-insights/internal/config"
 )
 
-//nolint:godoclint,golint // test constants don't need doc comments
+//nolint:godoclint // test constants don't need doc comments
 const (
 	configToken          = "config-token"
 	configUser           = "config-user"
@@ -18,6 +18,8 @@ const (
 	envOverridesConfig   = "env overrides config"
 	flagOverridesEnvCfg  = "flag overrides env and config"
 	flagNotSetOverrideEn = "flag not set does not override env"
+	userAydev            = "AYDEV-FR"
+	userBoxBox           = "BoxBoxJason"
 )
 
 // TestResolveToken verifies that resolveToken respects flag > env > config
@@ -272,64 +274,70 @@ func TestStringSliceFlag(t *testing.T) {
 	})
 }
 
-// TestShouldSkipMaintainedDiscovery verifies that auto-discovery is skipped
-// only when maintainedRepos is unset (nil) and the analyzed username
-// differs from the authenticated token owner.
-func TestShouldSkipMaintainedDiscovery(t *testing.T) {
-	t.Parallel()
+// skipDiscoveryCase is one row of the TestShouldSkipMaintainedDiscovery table.
+type skipDiscoveryCase struct {
+	name                  string
+	maintainedRepos       []string
+	username              string
+	authenticatedUsername string
+	want                  bool
+}
 
-	tests := []struct {
-		name                  string
-		maintainedRepos       []string
-		username              string
-		authenticatedUsername string
-		want                  bool
-	}{
+// skipDiscoveryTests returns the cases for TestShouldSkipMaintainedDiscovery.
+func skipDiscoveryTests() []skipDiscoveryCase {
+	return []skipDiscoveryCase{
 		{
 			name:                  "unset repos, different user than token owner",
 			maintainedRepos:       nil,
-			username:              "AYDEV-FR",
-			authenticatedUsername: "BoxBoxJason",
+			username:              userAydev,
+			authenticatedUsername: userBoxBox,
 			want:                  true,
 		},
 		{
 			name:                  "unset repos, same user as token owner",
 			maintainedRepos:       nil,
-			username:              "BoxBoxJason",
-			authenticatedUsername: "BoxBoxJason",
+			username:              userBoxBox,
+			authenticatedUsername: userBoxBox,
 			want:                  false,
 		},
 		{
 			name:                  "unset repos, same user, different case",
 			maintainedRepos:       nil,
 			username:              "boxboxjason",
-			authenticatedUsername: "BoxBoxJason",
+			authenticatedUsername: userBoxBox,
 			want:                  false,
 		},
 		{
 			name:                  "explicit empty repos, different user",
 			maintainedRepos:       []string{},
-			username:              "AYDEV-FR",
-			authenticatedUsername: "BoxBoxJason",
+			username:              userAydev,
+			authenticatedUsername: userBoxBox,
 			want:                  false,
 		},
 		{
 			name:                  "explicit non-empty repos, different user",
 			maintainedRepos:       []string{"owner/repo"},
-			username:              "AYDEV-FR",
-			authenticatedUsername: "BoxBoxJason",
+			username:              userAydev,
+			authenticatedUsername: userBoxBox,
 			want:                  false,
 		},
 		{
 			name:                  "no token (unauthenticated), unset repos",
 			maintainedRepos:       nil,
-			username:              "AYDEV-FR",
+			username:              userAydev,
 			authenticatedUsername: "",
 			want:                  false,
 		},
 	}
+}
 
-	for _, testCase := range tests {
+// TestShouldSkipMaintainedDiscovery verifies that auto-discovery is skipped
+// only when maintainedRepos is unset (nil) and the analyzed username
+// differs from the authenticated token owner.
+func TestShouldSkipMaintainedDiscovery(t *testing.T) {
+	t.Parallel()
+
+	for _, testCase := range skipDiscoveryTests() {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 

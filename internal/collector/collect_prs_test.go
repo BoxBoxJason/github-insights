@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v91/github"
+	"github.com/google/go-github/v92/github"
 )
 
-//nolint:godoclint,golint // test constants don't need doc comments
+//nolint:godoclint // test constants don't need doc comments
 const (
 	draftTest            = "draft"
 	awaitingReviewTest   = "open with no reviews awaits review"
