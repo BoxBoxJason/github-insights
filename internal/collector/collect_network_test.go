@@ -10,6 +10,7 @@ import (
 // Test-only constants for collect_network_test assertions.
 const (
 	reviewerUsername = "reviewer"
+	repoAdmin        = "owner/repo-admin"
 )
 
 // TestResolveMaintainedRepos_NilTriggersDiscovery verifies that a nil
@@ -29,7 +30,7 @@ func TestResolveMaintainedRepos_NilTriggersDiscovery(t *testing.T) {
 		t.Fatalf("resolveMaintainedRepos() error = %v", err)
 	}
 
-	if len(repos) != 1 || repos[0] != "owner/repo-admin" {
+	if len(repos) != 1 || repos[0] != repoAdmin {
 		t.Errorf("repos = %v, want [owner/repo-admin] from discovery", repos)
 	}
 }
@@ -106,7 +107,7 @@ func TestDiscoverMaintainedRepos(t *testing.T) {
 	}
 
 	want := map[string]bool{
-		"owner/repo-admin":    true,
+		repoAdmin:             true,
 		"owner/repo-maintain": true,
 		"owner/repo-push":     true,
 	}

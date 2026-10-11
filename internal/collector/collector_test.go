@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//nolint:godoclint,golint // test constants don't need doc comments
+//nolint:godoclint // test constants don't need doc comments
 //nolint:goconst,nolintlint // test constants are intentionally reused across test files
 const (
 	ownerTest = "owner"

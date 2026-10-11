@@ -61,8 +61,6 @@ func (c *Collector) APICallCount() int64 {
 
 // Collect gathers all tracked GitHub activity and returns it keyed by
 // "owner/repo".
-//
-//nolint:funlen // collection setup with 8 concurrent goroutines is necessarily verbose
 func (c *Collector) Collect(ctx context.Context, maintainedRepos []string) (map[string]*RepoActivity, error) {
 	c.logger.Info("collecting github activity",
 		zap.String("user", c.username),
