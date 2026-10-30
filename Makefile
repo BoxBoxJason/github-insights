@@ -57,6 +57,22 @@ vuln: deps
 	@command -v govulncheck >/dev/null 2>&1 || { echo "Installing govulncheck..."; go install golang.org/x/vuln/cmd/govulncheck@$(govulncheck_version); }
 	govulncheck ./...
 
+# Regenerate the documentation pages derived from the code (docs/content/docs/cli-reference.md, output-schema.md).
+# `make test` fails when the committed pages are stale.
+docs-generate:
+	@echo "Regenerating the generated documentation pages..."
+	UPDATE_DOCS=1 $(GO) test ./cmd/github-insights -run '^(TestCLIReference|TestOutputSchema)$$' -count=1
+
+# Build the documentation site into docs/public (needs the extended Hugo, see CONTRIBUTING.md).
+docs: docs-generate
+	@command -v hugo >/dev/null 2>&1 || { echo "hugo (extended) is required, see https://gohugo.io/installation/"; exit 1; }
+	hugo --source docs --gc --minify
+
+# Serve the documentation site with live reload.
+docs-serve:
+	@command -v hugo >/dev/null 2>&1 || { echo "hugo (extended) is required, see https://gohugo.io/installation/"; exit 1; }
+	hugo server --source docs
+
 # Docker target
 package:
 	@echo "Building Docker image..."
@@ -72,4 +88,4 @@ frontend: frontend-data
 	@echo "Open frontend/index.html in your browser (e.g. xdg-open frontend/index.html)"
 
 # Phony targets
-.PHONY: deps build lint dependency-check test package frontend-data frontend
+.PHONY: deps build lint dependency-check test vuln docs-generate docs docs-serve package frontend-data frontend
