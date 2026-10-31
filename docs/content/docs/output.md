@@ -1,5 +1,6 @@
 ---
 title: Output
+description: "How github-insights writes its results: one JSON file per repository, how the files are named, and what each section of a report holds."
 weight: 35
 ---
 

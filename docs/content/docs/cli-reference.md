@@ -1,5 +1,6 @@
 ---
 title: CLI reference
+description: "Complete github-insights command-line reference, generated from the flag definitions: every flag, its type and its default."
 weight: 70
 ---
 

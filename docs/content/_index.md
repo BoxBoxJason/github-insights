@@ -1,5 +1,6 @@
 ---
 title: github-insights
+description: "github-insights collects the pull requests, reviews, issues, mentions, releases and tags you worked on in GitHub over a date range, as JSON."
 layout: hextra-home
 ---
 

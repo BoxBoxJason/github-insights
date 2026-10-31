@@ -1,5 +1,6 @@
 ---
 title: Troubleshooting
+description: "Fix common github-insights errors: missing token or username, missing or invalid dates, and no maintained repositories discovered."
 weight: 60
 ---
 

@@ -39,5 +39,12 @@ enableRobotsTXT = true
       icon = "github"
 
 [params]
+  description = "github-insights is a Go CLI that exports your GitHub pull requests, reviews, issues, mentions and releases over a date range as JSON."
+  # Social preview (1200x630), rendered with the theme's tools/social-card.mjs.
+  images = ["images/social.png"]
+  # Structured data (JSON-LD) for the home page. The repository has no LICENSE file yet.
+  [params.project]
+    repository = "https://github.com/boxboxjason/github-insights"
+    programmingLanguage = "Go"
   [params.editURL]
     base = "https://github.com/boxboxjason/github-insights/edit/main/docs/content"

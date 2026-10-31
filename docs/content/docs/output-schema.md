@@ -1,5 +1,6 @@
 ---
 title: Output schema
+description: "Field-by-field reference of the github-insights JSON reports, generated from the Go types: RepoActivity and every nested object."
 weight: 40
 ---
 
