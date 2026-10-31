@@ -35,45 +35,28 @@ func main() {
 //
 //nolint:cyclop,gocyclo,funlen // flag parsing and config resolution are necessarily verbose
 func run(ctx context.Context) error {
-	var (
-		configPath     string
-		startFlag      stringFlag
-		endFlag        stringFlag
-		outFlag        stringFlag
-		tokenFlag      stringFlag
-		usernameFlag   stringFlag
-		maintainedFlag stringSliceFlag
-		verbose        bool
-	)
+	flags := registerFlags(flag.CommandLine)
 
-	flag.StringVar(&configPath, "config", "", "Path to YAML config file (default: config.yaml if present)")
-	flag.Var(&startFlag, "start", "Start date (RFC3339 or YYYY-MM-DD)")
-	flag.Var(&endFlag, "end", "End date (RFC3339 or YYYY-MM-DD, defaults to now)")
-	flag.Var(&outFlag, "out", "Output directory for JSON files")
-	flag.Var(&tokenFlag, "token", "GitHub token (optional; overrides GITHUB_TOKEN and config file)")
-	flag.Var(&usernameFlag, "username", "GitHub username to query (overrides GITHUB_USERNAME and config file)")
-	flag.Var(&maintainedFlag, "maintained", "Maintained repo list (repeatable, or comma-separated)")
-	flag.BoolVar(&verbose, "verbose", false, "Enable verbose (debug-level) logging")
 	flag.Parse()
 
-	logger, err := buildLogger(verbose)
+	logger, err := buildLogger(flags.verbose)
 	if err != nil {
 		return fmt.Errorf("build logger: %w", err)
 	}
 
 	defer logger.Sync() //nolint:errcheck // best-effort flush on exit
 
-	rawConfig, _, err := config.Load(configPath)
+	rawConfig, _, err := config.Load(flags.configPath)
 	if err != nil {
 		return err //nolint:wrapcheck // config load error is self-explanatory
 	}
 
-	token := resolveToken(&rawConfig, tokenFlag)
-	username := resolveUsername(&rawConfig, usernameFlag)
+	token := resolveToken(&rawConfig, flags.token)
+	username := resolveUsername(&rawConfig, flags.username)
 
 	startValue := rawConfig.Start
-	if startFlag.IsSet {
-		startValue = startFlag.Value
+	if flags.start.IsSet {
+		startValue = flags.start.Value
 	}
 
 	if startValue == "" {
@@ -86,8 +69,8 @@ func run(ctx context.Context) error {
 	}
 
 	endValue := rawConfig.End
-	if endFlag.IsSet {
-		endValue = endFlag.Value
+	if flags.end.IsSet {
+		endValue = flags.end.Value
 	}
 
 	var endTime time.Time
@@ -102,8 +85,8 @@ func run(ctx context.Context) error {
 	}
 
 	outputDir := rawConfig.OutputDir
-	if outFlag.IsSet {
-		outputDir = outFlag.Value
+	if flags.out.IsSet {
+		outputDir = flags.out.Value
 	}
 
 	if outputDir == "" {
@@ -116,8 +99,8 @@ func run(ctx context.Context) error {
 	// specify a list (auto-discovery is allowed), and non-nil (possibly
 	// empty) when either explicitly sets one (auto-discovery is skipped).
 	maintainedRepos := rawConfig.MaintainedRepos
-	if maintainedFlag.IsSet {
-		maintainedRepos = maintainedFlag.Values
+	if flags.maintained.IsSet {
+		maintainedRepos = flags.maintained.Values
 		if maintainedRepos == nil {
 			maintainedRepos = []string{}
 		}
@@ -186,6 +169,35 @@ func run(ctx context.Context) error {
 	logger.Info("github api calls", zap.Int64("total", col.APICallCount()))
 
 	return nil
+}
+
+// cliFlags holds the values of the command line flags.
+type cliFlags struct {
+	configPath string
+	start      stringFlag
+	end        stringFlag
+	out        stringFlag
+	token      stringFlag
+	username   stringFlag
+	maintained stringSliceFlag
+	verbose    bool
+}
+
+// registerFlags defines the command line flags on flagSet and returns where
+// their values are stored once flagSet is parsed.
+func registerFlags(flagSet *flag.FlagSet) *cliFlags {
+	flags := &cliFlags{}
+
+	flagSet.StringVar(&flags.configPath, "config", "", "Path to YAML config file (default: config.yaml if present)")
+	flagSet.Var(&flags.start, "start", "Start date (RFC3339 or YYYY-MM-DD)")
+	flagSet.Var(&flags.end, "end", "End date (RFC3339 or YYYY-MM-DD, defaults to now)")
+	flagSet.Var(&flags.out, "out", "Output directory for JSON files")
+	flagSet.Var(&flags.token, "token", "GitHub token (optional; overrides GITHUB_TOKEN and config file)")
+	flagSet.Var(&flags.username, "username", "GitHub username to query (overrides GITHUB_USERNAME and config file)")
+	flagSet.Var(&flags.maintained, "maintained", "Maintained repo list (repeatable, or comma-separated)")
+	flagSet.BoolVar(&flags.verbose, "verbose", false, "Enable verbose (debug-level) logging")
+
+	return flags
 }
 
 // buildLogger constructs a console zap logger at INFO level normally, or
