@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.27.1-alpine@sha256:cf6fca6641884b8433441b2b0652976f975e1d0fdd26d177eaaf8596087f3125 AS build
+FROM docker.io/library/golang:1.27.2-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d AS build
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ ENV GO111MODULE=on \
 RUN apk add --no-cache make git && \
   make build
 
-FROM docker.io/library/alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS security_provider
+FROM docker.io/library/alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS security_provider
 
 RUN addgroup -S github-insights \
     && adduser -S github-insights -G github-insights
