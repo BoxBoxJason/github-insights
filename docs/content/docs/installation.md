@@ -1,5 +1,6 @@
 ---
 title: Installation
+description: "Install github-insights with go install, a release binary, the container image or from source, and create the GitHub token it uses."
 weight: 10
 ---
 

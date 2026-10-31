@@ -1,5 +1,6 @@
 ---
 title: Configuration
+description: "Configure github-insights with a YAML file, environment variables or flags: resolution order, config keys, GITHUB_TOKEN and GITHUB_USERNAME."
 weight: 30
 ---
 

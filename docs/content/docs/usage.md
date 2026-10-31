@@ -1,5 +1,6 @@
 ---
 title: Usage
+description: "Run github-insights for a date range: every command-line flag, with examples, and where the per-repository JSON reports are written."
 weight: 20
 ---
 

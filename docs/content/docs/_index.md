@@ -1,5 +1,6 @@
 ---
 title: Documentation
+description: "Overview of github-insights: track your GitHub pull requests, code reviews, issues, mentions and releases over a date range, exported as JSON."
 weight: 1
 ---
 

@@ -1,5 +1,6 @@
 ---
 title: Viewer
+description: "Browse github-insights reports in the static Steam-themed viewer: repository cards and per-repository PRs, reviews, issues and releases."
 weight: 50
 ---
 
