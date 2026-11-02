@@ -2,6 +2,8 @@
 
 Collect comprehensive activity insights from GitHub. Track your contributions—pull requests, code reviews, issues, mentions, and releases—across a date range and output structured data for reporting, analysis, or documentation.
 
+[![Watch the github-insights video](./docs/static/images/discover.jpg)](https://boxboxjason.github.io/github-insights/videos/discover.mp4)
+
 ![Example visualization of collected insights in the Steam-themed viewer](./docs/static/images/example.png)
 
 ## Features

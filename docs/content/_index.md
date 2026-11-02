@@ -32,3 +32,7 @@ layout: hextra-home
     subtitle="One JSON file per repository, with a documented schema, and a static viewer to browse them."
   >}}
 {{< /hextra/feature-grid >}}
+
+{{< spacer "3rem" >}}
+
+{{< video "videos/discover.mp4" >}}
