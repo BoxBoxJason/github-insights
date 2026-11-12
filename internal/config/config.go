@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // RawConfig holds the raw, unvalidated fields from a YAML config file.
